@@ -25,5 +25,6 @@ switch ($Task) {
     "batch"    { & $py -m src.cli batch --input data/receipts --output outputs @Rest }
     "summary"  { & $py -m src.cli summary --json-dir outputs/json --output outputs }
     "eval"     { & $py eval/evaluate.py --json-dir outputs/json --labels eval/labels.csv }
-    default    { Write-Host "tasks: test | test-all | lint | fix | coverage | check | batch | summary | eval" }
+    "compare"  { & $py eval/compare_engines.py @Rest }
+    default    { Write-Host "tasks: test | test-all | lint | fix | coverage | check | batch | summary | eval | compare" }
 }
