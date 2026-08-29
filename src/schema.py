@@ -61,7 +61,8 @@ class ReceiptExtraction(BaseModel):
             "store_name": self.store_name.model_dump(),
             "date": self.date.model_dump(),
             "items": [
-                {"name": it.name.model_dump(), "price": it.price.model_dump()}
+                {"name": it.name.model_dump(), "price": it.price.model_dump(),
+                 "qty": it.meta.get("qty")}
                 for it in self.items
             ],
             "total_amount": self.total_amount.model_dump(),
