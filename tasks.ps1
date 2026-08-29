@@ -26,5 +26,7 @@ switch ($Task) {
     "summary"  { & $py -m src.cli summary --json-dir outputs/json --output outputs }
     "eval"     { & $py eval/evaluate.py --json-dir outputs/json --labels eval/labels.csv }
     "compare"  { & $py eval/compare_engines.py @Rest }
-    default    { Write-Host "tasks: test | test-all | lint | fix | coverage | check | batch | summary | eval | compare" }
+    "validate" { & $py scripts/validate_json.py outputs/json }
+    "rank"     { & $py scripts/rank_outputs.py outputs/json @Rest }
+    default    { Write-Host "tasks: test | test-all | lint | fix | coverage | check | batch | summary | eval | compare | validate | rank" }
 }

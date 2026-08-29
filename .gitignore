@@ -33,6 +33,9 @@ eval/eval_report.md
 eval/calibration.png
 eval/engine_comparison.md
 
+# ---- Writeup intermediate (docs/writeup.pdf is the tracked deliverable) ----
+docs/writeup.html
+
 # ---- EasyOCR / torch model cache (if redirected into repo) ----
 .EasyOCR/
 models/

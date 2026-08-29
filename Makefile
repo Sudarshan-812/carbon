@@ -16,3 +16,6 @@ summary:   ; $(PY) -m src.cli summary --json-dir outputs/json --output outputs
 eval:      ; $(PY) eval/evaluate.py --json-dir outputs/json --labels eval/labels.csv
 
 compare:   ; $(PY) eval/compare_engines.py
+
+validate:  ; $(PY) scripts/validate_json.py outputs/json
+rank:      ; $(PY) scripts/rank_outputs.py outputs/json
