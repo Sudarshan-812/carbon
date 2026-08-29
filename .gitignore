@@ -1,0 +1,36 @@
+# ---- Prompt log (internal, do not publish) ----
+Prompt.md
+
+# ---- Python ----
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.ipynb_checkpoints/
+
+# ---- Project data & outputs ----
+data/receipts/*
+!data/receipts/.gitkeep
+data/*.zip
+outputs/json/*
+!outputs/json/.gitkeep
+outputs/debug/*
+!outputs/debug/.gitkeep
+outputs/*.json
+outputs/*.csv
+outputs/run_report.md
+install.log
+
+# ---- EasyOCR / torch model cache (if redirected into repo) ----
+.EasyOCR/
+models/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

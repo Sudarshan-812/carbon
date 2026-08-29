@@ -1,0 +1,87 @@
+# ============================================================
+# Carbon Crunch - Receipt OCR pipeline configuration
+# Every module reads its behaviour from here. No magic numbers in code.
+# ============================================================
+
+paths:
+  input_dir: data/receipts
+  output_dir: outputs
+  json_dir: outputs/json
+  debug_dir: outputs/debug
+
+ocr:
+  engine: easyocr            # easyocr | tesseract
+  languages: [en]
+  gpu: false
+  tesseract_cmd: null        # e.g. "C:/Program Files/Tesseract-OCR/tesseract.exe" if not on PATH
+  line_grouping:
+    y_tolerance_factor: 0.6  # * median token height => same-line threshold
+    right_column_frac: 0.40  # rightmost fraction of a line where prices live
+
+preprocess:
+  enabled: true
+  to_grayscale: true
+  upscale: true
+  min_side: 1000
+  max_side: 2600
+  denoise: true
+  denoise_method: fastnl     # fastnl | bilateral
+  denoise_h: 10
+  illumination_correction: true
+  clahe: true
+  clahe_clip: 2.0
+  clahe_tile: 8
+  deskew: true
+  deskew_max_deg: 15.0
+  deskew_min_deg: 0.3
+  orientation_fix: false      # needs Tesseract OSD
+
+extract:
+  store_name:
+    n_header_lines: 6
+    company_suffixes: [SDN BHD, SDN. BHD., BHD, ENTERPRISE, TRADING, RESTORAN,
+                       RESTAURANT, MART, CAFE, PLT, "(M)"]
+    reject_contains: [TAX INVOICE, RECEIPT, CASH BILL, GST ID, GST NO, GST REG,
+                      TEL, "NO.", INVOICE NO, "TABLE"]
+    vendor_merge_ratio: 90
+  date:
+    keywords: [DATE, TARIKH, DT, "INVOICE DATE", "DATE TIME", "DATETIME"]
+    min_year: 2000
+  total:
+    tier_a: ["GRAND TOTAL", "TOTAL AMOUNT", "NETT TOTAL", "NET TOTAL",
+             "TOTAL INCL GST", "TOTAL INCLUSIVE GST", "TOTAL (RM)",
+             "AMOUNT DUE", "BALANCE DUE", "JUMLAH"]
+    tier_b: ["TOTAL", "AMOUNT"]
+    exclude: ["SUB TOTAL", "SUBTOTAL", "TOTAL QTY", "TOTAL QUANTITY",
+              "TOTAL SAVINGS", "ROUNDING", "ROUND ADJ", "CHANGE", "CASH",
+              "GST", "TAX", "DISCOUNT", "TOTAL ITEM", "ITEM COUNT"]
+    fallback_bottom_frac: 0.33
+  items:
+    max_items: 200
+    separator_chars: "-=_*."
+    drop_contains: ["SUBTOTAL", "SUB TOTAL", "ROUNDING", "GST", "TAX",
+                    "CHANGE", "CASH", "TOTAL", "MEMBER", "POINTS", "THANK"]
+
+confidence:
+  low_conf_threshold: 0.7
+  weights:
+    store_name:   { ocr: 0.35, pattern: 0.20, heuristic: 0.45 }
+    date:         { ocr: 0.35, pattern: 0.40, heuristic: 0.25 }
+    total_amount: { ocr: 0.35, pattern: 0.20, heuristic: 0.20, cross_check: 0.25 }
+    item_name:    { ocr: 0.70, pattern: 0.30 }
+    item_price:   { ocr: 0.55, pattern: 0.45 }
+  cross_check:
+    abs_tolerance: 0.50
+    rel_tolerance: 0.05
+  flags:
+    low_mean_ocr_conf: 0.40
+    mismatch_cross_check: 0.60
+
+summary:
+  currency: RM
+  min_total_conf: 0.5
+
+run:
+  seed: 1234
+  workers: 1
+  pipeline_version: "0.1.0"

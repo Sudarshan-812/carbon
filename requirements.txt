@@ -1,0 +1,29 @@
+# ============================================================
+# Carbon Crunch - Receipt OCR & Information Extraction
+# Runtime dependencies
+# ============================================================
+
+# --- Core image / array processing ---
+numpy>=1.26,<3
+opencv-python>=4.9
+Pillow>=10.2
+scikit-image>=0.22
+
+# --- OCR engines ---
+easyocr>=1.7.1
+pytesseract>=0.3.10          # needs the Tesseract binary installed separately (see README)
+
+# --- PyTorch (EasyOCR backend; CPU build is pulled by default on Windows) ---
+torch>=2.6
+torchvision>=0.21
+
+# --- Key-information-extraction helpers ---
+rapidfuzz>=3.6
+python-dateutil>=2.9
+regex>=2024.5
+
+# --- Data structuring / config / IO ---
+pydantic>=2.6
+PyYAML>=6.0
+pandas>=2.2
+tqdm>=4.66

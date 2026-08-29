@@ -1,0 +1,3 @@
+image_id,store_name,date,total_amount,n_items
+# Fill these by opening each image in data/receipts/. Leave a row blank to skip it.
+# date format: YYYY-MM-DD   total_amount: plain number e.g. 54.20
