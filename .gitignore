@@ -1,6 +1,9 @@
 # ---- Prompt log (internal, do not publish) ----
 Prompt.md
 
+# ---- Scratch / source materials (dataset zip, spec PDF) ----
+extra/
+
 # ---- Python ----
 .venv/
 venv/

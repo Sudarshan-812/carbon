@@ -9,7 +9,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-LOW_CONF_THRESHOLD = 0.7  # TODO(Phase 1): source from config.confidence.low_conf_threshold
+from .config import load_config
+
+try:
+    #: Fields scoring below this are listed in ``low_confidence_fields``.
+    #: Sourced from ``config.yaml`` -> ``confidence.low_conf_threshold``.
+    LOW_CONF_THRESHOLD: float = load_config().confidence.low_conf_threshold
+except Exception:  # noqa: BLE001  # pragma: no cover - broken config, keep schema importable
+    LOW_CONF_THRESHOLD = 0.7
 
 
 class FieldConf(BaseModel):
