@@ -72,6 +72,8 @@ class PreprocessConfig(_Base):
     deskew_max_deg: float
     deskew_min_deg: float
     orientation_fix: bool
+    orientation_retry: bool
+    orientation_retry_conf: float
 
     @field_validator("denoise_method")
     @classmethod

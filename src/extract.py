@@ -41,6 +41,7 @@ class RawExtraction:
     total_amount: FieldRaw = field(default_factory=FieldRaw)
     items: list[tuple[FieldRaw, FieldRaw]] = field(default_factory=list)  # (name, price)
     body_span: tuple[int, int] | None = None
+    items_truncated: bool = False
 
 
 class VendorRegistry:
@@ -488,5 +489,6 @@ def extract_fields(
     raw.date = extract_date(ocr, cfg)
     raw.total_amount = extract_total(ocr, cfg)
     raw.items = extract_items(ocr, cfg)
+    raw.items_truncated = len(raw.items) >= cfg.extract.items.max_items
     raw.body_span = _body_span(ocr, cfg)
     return raw

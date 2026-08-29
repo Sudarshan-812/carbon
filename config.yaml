@@ -34,7 +34,9 @@ preprocess:
   deskew: true
   deskew_max_deg: 15.0
   deskew_min_deg: 0.3
-  orientation_fix: false      # needs Tesseract OSD
+  orientation_fix: false        # needs Tesseract OSD
+  orientation_retry: true       # if OCR mean-conf is low, re-OCR at 90/180/270
+  orientation_retry_conf: 0.35  # trigger threshold for the retry above
 
 extract:
   store_name:

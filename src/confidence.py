@@ -219,6 +219,8 @@ def _flags(
         flags.append("missing_total")
     if not raw.items:
         flags.append("no_items")
+    if raw.items_truncated:
+        flags.append("items_truncated")
     if raw.total_amount.rule == "fallback_max":
         flags.append("total_from_fallback")
     if raw.total_amount.signals.get("conflicting"):

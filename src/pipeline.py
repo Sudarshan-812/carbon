@@ -10,15 +10,16 @@ import random
 import traceback
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 from .confidence import score
 from .config import Config
 from .extract import VendorRegistry, extract_fields
-from .ocr import get_engine
+from .ocr import OcrEngine, OcrResult, get_engine
 from .preprocess import dump_debug_images, preprocess
 from .schema import ReceiptExtraction
-from .utils import Timer, get_logger, imread_unicode
+from .utils import Timer, detect_currency, get_logger, imread_unicode
 
 log = get_logger(__name__)
 
@@ -65,16 +66,24 @@ def run_one(
                 dump_debug_images(pre, cfg.paths.debug_dir, image_id)
 
             _seed_everything(cfg.run.seed)
-            ocr = get_engine(cfg).run(pre.image)
+            engine = get_engine(cfg)
+            ocr = engine.run(pre.image)
+            ocr, quarter_turn = _maybe_fix_orientation(engine, pre.image, ocr, cfg)
+
             result = score(extract_fields(ocr, cfg, vendors), ocr, cfg)
             if not ocr.tokens:
                 result.flags.insert(0, "ocr_empty")
 
+            currency = detect_currency(ocr.full_text)
+            if currency:
+                result.meta["currency_detected"] = currency
+
             result.meta.update(
                 image_id=image_id,
                 engine=ocr.engine,
-                rotation_applied=pre.rotation_applied,
-                preprocess_steps=pre.steps,
+                rotation_applied=round(pre.rotation_applied + quarter_turn, 2),
+                preprocess_steps=pre.steps + ([f"orientation_retry({quarter_turn})"]
+                                              if quarter_turn else []),
                 mean_ocr_confidence=round(ocr.mean_conf, 4),
                 n_lines=len(ocr.lines),
                 n_tokens=len(ocr.tokens),
@@ -89,6 +98,37 @@ def run_one(
         result.meta["error"] = str(exc)
         result.meta["traceback"] = traceback.format_exc(limit=4)
         return result
+
+
+_QUARTER_TURNS = {
+    90: cv2.ROTATE_90_CLOCKWISE,
+    180: cv2.ROTATE_180,
+    270: cv2.ROTATE_90_COUNTERCLOCKWISE,
+}
+
+
+def _maybe_fix_orientation(
+    engine: OcrEngine, image: np.ndarray, ocr: OcrResult, cfg: Config
+) -> tuple[OcrResult, int]:
+    """Re-OCR the image at 90/180/270 when confidence is poor; keep the best.
+
+    Returns ``(best_ocr_result, degrees_rotated)``. A no-op unless
+    ``preprocess.orientation_retry`` is on and ``ocr.mean_conf`` is below
+    ``preprocess.orientation_retry_conf``.
+    """
+    p = cfg.preprocess
+    if not p.orientation_retry or ocr.mean_conf >= p.orientation_retry_conf:
+        return ocr, 0
+
+    best_ocr, best_turn = ocr, 0
+    for degrees, code in _QUARTER_TURNS.items():
+        candidate = engine.run(cv2.rotate(image, code))
+        if candidate.mean_conf > best_ocr.mean_conf + 0.05:  # meaningful gain only
+            best_ocr, best_turn = candidate, degrees
+    if best_turn:
+        log.info("orientation retry: rotated %d deg (conf %.2f -> %.2f)",
+                 best_turn, ocr.mean_conf, best_ocr.mean_conf)
+    return best_ocr, best_turn
 
 
 def _empty_result(image_id: str, cfg: Config, flags: list[str]) -> ReceiptExtraction:

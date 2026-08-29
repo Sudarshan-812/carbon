@@ -61,6 +61,10 @@ def _iter_images(input_dir: Path, limit: int | None) -> list[Path]:
     return files[:limit] if limit else files
 
 
+def _sha1(path: Path) -> str:
+    return hashlib.sha1(path.read_bytes()).hexdigest()
+
+
 def _is_error(result: ReceiptExtraction) -> bool:
     return any(f.startswith("pipeline_error") or f == "unreadable_image"
               for f in result.flags)
@@ -87,8 +91,17 @@ def _cmd_batch(args: argparse.Namespace) -> int:
 
     json_dir = Path(cfg.paths.json_dir)
     workers = max(1, args.workers if args.workers is not None else cfg.run.workers)
-    log.info("processing %d images (engine=%s, workers=%d) -> %s",
-             len(images), cfg.ocr.engine, workers, json_dir)
+
+    # De-duplicate byte-identical images: process one per sha1 group, copy the
+    # result to the others' JSON files (Prompt.md - Phase 9, edge case 6).
+    groups: dict[str, list[Path]] = {}
+    for path in images:
+        groups.setdefault(_sha1(path), []).append(path)
+    reps = [paths[0] for paths in groups.values()]
+    dup_paths = {paths[0].stem: paths[1:] for paths in groups.values() if len(paths) > 1}
+    n_duplicates = sum(len(v) for v in dup_paths.values())
+    log.info("processing %d unique images (%d duplicates) engine=%s workers=%d -> %s",
+             len(reps), n_duplicates, cfg.ocr.engine, workers, json_dir)
 
     try:
         from tqdm import tqdm
@@ -101,13 +114,13 @@ def _cmd_batch(args: argparse.Namespace) -> int:
 
     if workers == 1:
         vendors = VendorRegistry(cfg.extract.store_name.vendor_merge_ratio)
-        for path in tqdm(images, desc="receipts", unit="img"):
+        for path in tqdm(reps, desc="receipts", unit="img"):
             result = run_one(path, cfg, vendors=vendors, debug=args.debug)
             write_receipt_json(result, json_dir)
             results.append(result)
     else:
         with cf.ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = [pool.submit(run_one, path, cfg, debug=args.debug) for path in images]
+            futures = [pool.submit(run_one, path, cfg, debug=args.debug) for path in reps]
             for future in tqdm(cf.as_completed(futures), total=len(futures),
                                desc="receipts", unit="img"):
                 result = future.result()
@@ -115,14 +128,22 @@ def _cmd_batch(args: argparse.Namespace) -> int:
                 results.append(result)
         results.sort(key=lambda r: str(r.meta.get("image_id", "")))
 
+    for result in results:  # emit a JSON for every duplicate too
+        for dup in dup_paths.get(result.meta.get("image_id", ""), []):
+            clone = result.model_copy(deep=True)
+            clone.meta = {**result.meta, "image_id": dup.stem,
+                          "duplicate_of": result.meta.get("image_id")}
+            write_receipt_json(clone, json_dir)
+
     wall = time.perf_counter() - started
     failed = [r for r in results if _is_error(r)]
-    _write_run_report(Path(cfg.paths.output_dir) / "run_report.md", cfg, results, wall)
+    _write_run_report(Path(cfg.paths.output_dir) / "run_report.md", cfg, results, wall,
+                      n_duplicates=n_duplicates)
     write_summary(build_summary(results, cfg), cfg.paths.output_dir)
 
     rate = len(results) / wall if wall > 0 else 0.0
     print(f"\n{len(results)} processed | {len(results) - len(failed)} ok | "
-          f"{len(failed)} failed | {wall:.1f}s | {rate:.2f} img/s")
+          f"{len(failed)} failed | {n_duplicates} duplicate(s) | {wall:.1f}s | {rate:.2f} img/s")
     print(f"JSON -> {json_dir}   report -> {Path(cfg.paths.output_dir) / 'run_report.md'}")
 
     if results and len(failed) / len(results) > ERROR_ABORT_FRACTION:
@@ -137,7 +158,8 @@ def _mean(values: list[float]) -> float:
 
 
 def _write_run_report(
-    path: Path, cfg: Config, results: list[ReceiptExtraction], wall: float
+    path: Path, cfg: Config, results: list[ReceiptExtraction], wall: float,
+    *, n_duplicates: int = 0,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     total = len(results)
@@ -171,8 +193,8 @@ def _write_run_report(
     header = (
         f"- Engine: **{cfg.ocr.engine}**   Config hash: `{_config_hash(cfg)}`   "
         f"Pipeline: `{cfg.run.pipeline_version}`\n"
-        f"- Images: **{total}**   succeeded: **{total - len(failed)}**   "
-        f"failed: **{len(failed)}**\n"
+        f"- Images: **{total}** unique   succeeded: **{total - len(failed)}**   "
+        f"failed: **{len(failed)}**   duplicates: **{n_duplicates}**\n"
         f"- Wall time: **{wall:.1f}s**   throughput: **{rate:.2f} img/s**"
     )
     lines = [

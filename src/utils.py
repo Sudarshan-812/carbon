@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 from types import TracebackType
 from typing import Self
@@ -153,6 +154,42 @@ def parse_money(text: str | None) -> float | None:
         return round(float(_normalize_number(match.group("num"))), 2)
     except ValueError:  # pragma: no cover - regex should guarantee a number
         return None
+
+
+# --- currency detection -----------------------------------------------
+
+_CURRENCY_WORDS = {
+    "RM": "MYR", "MYR": "MYR", "RINGGIT": "MYR",
+    "USD": "USD", "US$": "USD",
+    "SGD": "SGD", "S$": "SGD",
+    "EUR": "EUR", "GBP": "GBP", "AUD": "AUD", "JPY": "JPY",
+    "IDR": "IDR", "RP": "IDR", "RUPIAH": "IDR",
+    "THB": "THB", "BAHT": "THB", "INR": "INR",
+}
+_CURRENCY_SYMBOLS = {"€": "EUR", "£": "GBP", "¥": "JPY"}
+
+
+def detect_currency(text: str | None) -> str | None:
+    """Best-guess ISO currency code from free OCR text, or ``None`` if unclear.
+
+    A bare ``$`` only votes for USD when no stronger word-level signal is
+    present (it is also the Malaysian/Singapore ``S$`` tail, etc.).
+    """
+    if not text:
+        return None
+    upper = text.upper()
+    votes: Counter[str] = Counter()
+    for word, code in _CURRENCY_WORDS.items():
+        hits = len(re.findall(rf"(?<![A-Z]){re.escape(word)}(?![A-Z])", upper))
+        if hits:
+            votes[code] += hits
+    for symbol, code in _CURRENCY_SYMBOLS.items():
+        hits = text.count(symbol)
+        if hits:
+            votes[code] += hits
+    if not votes:
+        return "USD" if "$" in text else None
+    return votes.most_common(1)[0][0]
 
 
 # --- image IO ----------------------------------------------------------
