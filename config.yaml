@@ -49,8 +49,9 @@ extract:
     min_year: 2000
   total:
     tier_a: ["GRAND TOTAL", "TOTAL AMOUNT", "NETT TOTAL", "NET TOTAL",
-             "TOTAL INCL GST", "TOTAL INCLUSIVE GST", "TOTAL (RM)",
-             "AMOUNT DUE", "BALANCE DUE", "JUMLAH"]
+             "TOTAL INCL GST", "TOTAL INCLUSIVE GST", "INCLUSIVE OF GST",
+             "INCLUSIVE GST", "TOTAL SALES INCLUSIVE", "TOTAL (RM)",
+             "AMOUNT DUE", "BALANCE DUE", "AMOUNT PAYABLE", "JUMLAH"]
     tier_b: ["TOTAL", "AMOUNT"]
     exclude: ["SUB TOTAL", "SUBTOTAL", "TOTAL QTY", "TOTAL QUANTITY",
               "TOTAL SAVINGS", "ROUNDING", "ROUND ADJ", "CHANGE", "CASH",
