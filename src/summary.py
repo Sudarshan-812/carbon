@@ -144,7 +144,14 @@ def write_summary(summary: ExpenseSummary, out_dir: str | Path) -> None:
 
 
 def _append_report_section(path: Path, summary: ExpenseSummary) -> None:
+    """Append (or replace) the ``## Financial summary`` section of run_report.md."""
     cur = summary.currency
+    marker = "\n## Financial summary\n"
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    cut = existing.find(marker)
+    if cut != -1:  # drop a previous run's section so re-runs stay idempotent
+        existing = existing[:cut].rstrip() + "\n"
+
     lines = [
         "", "## Financial summary", "",
         f"- Currency: **{cur}**",
@@ -163,5 +170,4 @@ def _append_report_section(path: Path, summary: ExpenseSummary) -> None:
         for store, s in _store_rows(summary)
     ]
     lines += ["", *(f"- _{note}_" for note in summary.notes), ""]
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write("\n".join(lines) + "\n")
+    path.write_text(existing + "\n".join(lines) + "\n", encoding="utf-8")

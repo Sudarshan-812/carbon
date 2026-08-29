@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import statistics
 import sys
+import threading
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -81,19 +82,25 @@ class OcrEngine(Protocol):
 
 # --- EasyOCR -----------------------------------------------------------
 
-_READERS: dict[tuple[str, ...], object] = {}
+_READERS: dict[tuple[int, tuple[str, ...]], object] = {}
+_READERS_LOCK = threading.Lock()
 
 
 def _easyocr_reader(languages: list[str], gpu: bool) -> object:
-    """Return a cached ``easyocr.Reader`` for this language set (built once)."""
-    key = tuple(languages)
-    reader = _READERS.get(key)
-    if reader is None:
-        import easyocr  # heavy (pulls torch); import only when actually used
+    """Return a cached ``easyocr.Reader``, one per (thread, language set).
 
-        log.info("building EasyOCR reader for languages=%s gpu=%s", list(key), gpu)
-        reader = easyocr.Reader(list(languages), gpu=gpu, verbose=False)
-        _READERS[key] = reader
+    EasyOCR's ``Reader`` is not thread-safe, so a batch run with ``workers > 1``
+    gets an independent reader per worker thread; single-threaded runs reuse one.
+    """
+    key = (threading.get_ident(), tuple(languages))
+    with _READERS_LOCK:
+        reader = _READERS.get(key)
+        if reader is None:
+            import easyocr  # heavy (pulls torch); import only when actually used
+
+            log.info("building EasyOCR reader for languages=%s gpu=%s", list(key[1]), gpu)
+            reader = easyocr.Reader(list(languages), gpu=gpu, verbose=False)
+            _READERS[key] = reader
     return reader
 
 
