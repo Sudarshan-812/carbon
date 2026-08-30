@@ -23,6 +23,17 @@ def test_match_total_exact_and_tolerance():
     assert ev._match_total("55.00", "54.20") == (False, False)
     assert ev._match_total(None, "54.20") == (False, False)
     assert ev._match_total("RM 1,234.50", "1234.50") == (True, True)
+    assert ev._match_total("49.90", "49.9") == (True, True)      # 1-dp hand-typed label
+    assert ev._match_total("72.00", "72") == (True, True)        # bare-int hand-typed label
+
+
+def test_match_date_accepts_iso_and_hand_typed_formats():
+    # model always emits ISO; labels may be hand-typed day-first
+    assert ev._match_date("2018-03-05", "2018-03-05") is True
+    assert ev._match_date("2018-03-05", "05-03-2018") is True
+    assert ev._match_date("2018-03-05", "05/03/2018") is True
+    assert ev._match_date("2018-03-06", "05-03-2018") is False
+    assert ev._match_date(None, "05-03-2018") is False
 
 
 def test_bucket_edges():
@@ -36,7 +47,7 @@ def test_bucket_edges():
 
 def test_field_stats_row():
     s = ev.FieldStats()
-    assert s.row("x") == "| — | 0 | — | — |"
+    assert s.row("x") == "| n/a | 0 | n/a | n/a |"
     s.add(exact=True, loose=True)
     s.add(exact=False, loose=True)
     row = s.row("fuzzy >= 90")

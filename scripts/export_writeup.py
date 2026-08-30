@@ -120,12 +120,20 @@ def main() -> int:
 
     pandoc = shutil.which("pandoc")
     if pandoc:
-        subprocess.run([pandoc, str(MD), "-o", str(PDF)], check=True)
-        print(f"wrote {PDF}  (via pandoc)")
-        return 0
+        # pandoc -> PDF needs a PDF engine; try the common ones, else fall
+        # through to the self-contained HTML.
+        engines = ["weasyprint", "wkhtmltopdf", "typst", "pdflatex", "xelatex"]
+        avail = next((e for e in engines if shutil.which(e)), None)
+        cmd = [pandoc, str(MD), "-o", str(PDF)]
+        if avail:
+            cmd.append(f"--pdf-engine={avail}")
+        if subprocess.run(cmd, check=False).returncode == 0 and PDF.is_file():
+            print(f"wrote {PDF}  (via pandoc{f' + {avail}' if avail else ''})")
+            return 0
+        print("pandoc found but no working PDF engine — writing HTML instead.")
 
     HTML.write_text(_md_to_html(MD.read_text(encoding="utf-8")), encoding="utf-8")
-    print(f"pandoc not found — wrote {HTML} instead.")
+    print(f"wrote {HTML}")
     print("To get the PDF, either:")
     print(f"  1. open {HTML.name} in a browser → Ctrl+P → 'Save as PDF', or")
     print("  2. install pandoc (winget install --id JohnMacFarlane.Pandoc -e) and re-run, or")

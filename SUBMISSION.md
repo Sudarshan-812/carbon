@@ -39,7 +39,7 @@ Produces `outputs/json/<image_id>.json` (one per receipt), plus
 - [ ] **Repo runnable from scratch** — fresh venv + `pip install -r requirements-dev.txt` + the batch command above. _(Re-tested literally against the README: PENDING final pass.)_
 - [x] **Per-receipt JSON** for every image — 371 files, `scripts/validate_json.py` → **371 valid / 0 invalid**. Nested `{value, confidence}` **and** flat `plain` block. Schema: `src/schema.py`.
 - [x] **`outputs/expense_summary.json` + `.csv`** — present. Full run: **MYR 22,797.96** across 338 / 367 receipts with a confident total; 29 excluded (missing / conf < 0.5); date range 2000→2025; spend-per-store fuzzy-merged. `outputs/run_report.md` has the coverage + flag histogram.
-- [x] **`docs/writeup.md`** (1–2 pp) covering all four required sub-points — Approach, Tools used, Results, Challenges (+ Improvements). _PDF export: `python scripts/export_writeup.py` (pandoc → `docs/writeup.pdf`; falls back to `docs/writeup.html` + Ctrl+P — PENDING run). §3 coverage numbers are from the full run; the accuracy table + calibration chart need `eval/labels.csv` hand-filled (PENDING)._
+- [x] **`docs/writeup.md`** (1–2 pp) covering all four required sub-points — Approach, Tools used, Results, Challenges (+ Improvements). §3 now carries the full-run coverage **and** the eval numbers (`eval/labels.csv` = 30 hand-labelled receipts): store fuzzy 70 %, date 80 %, total ±0.05 37 %, n_items ±1 77 %; calibration 0 → 44 → 66 → 89 % across confidence buckets. _PDF export: `python scripts/export_writeup.py` (pandoc not installed → writes `docs/writeup.html`, open + Ctrl+P → Save as PDF — PENDING)._
 - [x] **Confidence** — low-conf fields flagged, conflicts + missing handled. Code: `src/confidence.py`. Real example: **`outputs/json/X51005433541.json`** — `conflicting_total` flag, chosen `58.20` @ conf 0.56, rejected tier-A `62.70` kept in `meta.alternatives`.
 - [x] **Edge cases** — unreadable + rotated. Tests: `tests/test_edge_cases.py`. Real example JSONs: **`outputs/json/X51005433533.json`** (deskew 7.8°, still extracts store+total) and **`outputs/json/X51005268408.json`** (near-illegible thermal print → `low_mean_ocr_conf` + 3 more flags, everything low-confidence, nothing silently wrong).
 - [x] **Tests pass; ruff clean** — `ruff check src tests scripts eval` → clean; `pytest -q` → **131 passed, 1 deselected** (2026-08-30).
@@ -53,6 +53,12 @@ Produces `outputs/json/<image_id>.json` (one per receipt), plus
 - **No ground truth.** The dataset ships images only. Accuracy/calibration
   numbers come from a 30-receipt hand-labelled eval set (`eval/labels.csv`),
   not the full 371 — treat them as indicative.
+- **Total-amount accuracy is the weak spot** (≈37 % exact on the eval set). GST
+  receipts expose *Total (Excluding GST)* / GST-summary / rounding lines that the
+  keyword ranker sometimes prefers over *Total Inclusive of GST*; fast-food
+  bundle receipts tempt it toward the first item price. These misses are almost
+  always flagged (`total_from_fallback`, sub-0.7 confidence), so they surface
+  rather than pass silently — but the ranker rules need another pass.
 - **Tesseract not installed** on the build machine, so the engine comparison
   (`eval/compare_engines.py`) ran EasyOCR only; the Tesseract path is
   implemented and interface-compatible but unbenchmarked here.

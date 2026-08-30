@@ -38,7 +38,7 @@ def test_takeaway_is_three_sentences_single_engine():
     assert "blank until eval/labels.csv" in text
 
 
-def test_table_row_formats_none_accuracy_as_dash():
+def test_table_row_formats_none_accuracy_as_na():
     row = ce._table([ce.EngineRun(label="easyocr", n=3, sec_per_image=9.1,
                                   mean_ocr_conf=0.7, mean_field_conf=0.6)])
-    assert "| easyocr | 3 | 9.1 | 0.700 | 0.600 | — | — | — | — | 0 |" in row
+    assert "| easyocr | 3 | 9.1 | 0.700 | 0.600 | n/a | n/a | n/a | n/a | 0 |" in row

@@ -23,7 +23,7 @@ _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE.parent))
 sys.path.insert(0, str(_HERE))
 
-from evaluate import _load_labels, _match_store, _match_total
+from evaluate import _load_labels, _match_date, _match_store, _match_total
 from src.config import Config, load_config
 from src.pipeline import run_one
 
@@ -102,7 +102,7 @@ def _run_set(
         if gold.get("store_name"):
             hits["store"].append(_match_store(result.store_name.value, gold["store_name"])[1])
         if gold.get("date"):
-            hits["date"].append(bool(result.date.value) and result.date.value == gold["date"])
+            hits["date"].append(_match_date(result.date.value, gold["date"]))
         if gold.get("total_amount"):
             hits["total"].append(_match_total(result.total_amount.value, gold["total_amount"])[1])
         if gold.get("n_items"):
@@ -122,7 +122,7 @@ def _run_set(
 
 
 def _fmt(value: float | None) -> str:
-    return "—" if value is None else f"{value:.0%}"
+    return "n/a" if value is None else f"{value:.0%}"
 
 
 def _table(runs: list[EngineRun]) -> list[str]:
@@ -155,7 +155,7 @@ def _takeaway(engine_runs: list[EngineRun], pp_on: EngineRun, pp_off: EngineRun,
     delta = pp_on.mean_ocr_conf - pp_off.mean_ocr_conf
     verb = "raised" if delta >= 0 else "lowered"
     s2 = (f"Turning the preprocessing pipeline on {verb} mean OCR confidence by "
-          f"{abs(delta):.2f} ({pp_off.mean_ocr_conf:.2f} → {pp_on.mean_ocr_conf:.2f}) "
+          f"{abs(delta):.2f} ({pp_off.mean_ocr_conf:.2f} to {pp_on.mean_ocr_conf:.2f}) "
           f"and cost {pp_on.sec_per_image - pp_off.sec_per_image:+.1f}s/image.")
     s3 = ("Field-accuracy columns are populated from eval/labels.csv." if labelled
           else "Field-accuracy columns are blank until eval/labels.csv is filled in.")
@@ -201,13 +201,13 @@ def main() -> int:
     pp_off = _run_set(base, winner, preprocess_on=False, paths=paths, labels=labels,
                       label=f"{winner} (no preprocess)")
 
-    skipped_note = "" if not skipped else f"   ·   skipped (not installed): {', '.join(skipped)}"
+    skipped_note = "" if not skipped else f"   |   skipped (not installed): {', '.join(skipped)}"
     lines = [
         "# OCR engine comparison", "",
         f"Eval set: **{len(paths)}** images{skipped_note}",
         "", "## Engines (preprocessing on)", "",
         *_table(engine_runs), "",
-        f"## Preprocessing ablation — {winner}", "",
+        f"## Preprocessing ablation: {winner}", "",
         *_table([pp_on, pp_off]), "",
         "## Takeaway", "",
         _takeaway(engine_runs, pp_on, pp_off, winner, labelled), "",

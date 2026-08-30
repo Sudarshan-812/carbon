@@ -22,12 +22,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from dateutil import parser as dtparser
 from rapidfuzz import fuzz
 from src.utils import parse_money
 
@@ -67,11 +69,39 @@ def _match_store(pred: str | None, label: str) -> tuple[bool, bool]:
     return p == g, fuzz.token_set_ratio(p, g) >= FUZZY_THRESHOLD
 
 
+def _label_num(text: str) -> float | None:
+    """Parse a hand-typed number cell. Labels are clean (``49.9``, ``72``,
+    ``1,234.50``) so a plain float parse beats the OCR-oriented ``parse_money``,
+    which truncates a single decimal place (``49.9`` -> ``49.0``)."""
+    cleaned = re.sub(r"[^\d.\-]", "", (text or "").replace(",", ""))
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
 def _match_total(pred: str | None, label: str) -> tuple[bool, bool]:
-    pv, gv = parse_money(pred), parse_money(label)
+    pv, gv = parse_money(pred), _label_num(label)
     if pv is None or gv is None:
         return False, False
     return round(pv, 2) == round(gv, 2), abs(pv - gv) <= TOTAL_TOLERANCE
+
+
+def _iso(text: str | None) -> str:
+    """Normalise a date cell to ISO ``YYYY-MM-DD``. The pipeline always emits
+    ISO; hand-typed labels may instead be ``DD-MM-YYYY`` / ``DD/MM/YYYY``."""
+    text = (text or "").strip()
+    if not text or re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        return text
+    try:
+        return dtparser.parse(text, dayfirst=True).date().isoformat()
+    except (ValueError, OverflowError):
+        return text
+
+
+def _match_date(pred: str | None, label: str) -> bool:
+    p, g = _iso(pred), _iso(label)
+    return bool(p) and p == g
 
 
 # --- stats containers ----------------------------------
@@ -89,7 +119,7 @@ class FieldStats:
 
     def row(self, loose_label: str) -> str:
         if not self.n:
-            return "| — | 0 | — | — |"
+            return "| n/a | 0 | n/a | n/a |"
         return (f"| {self.exact}/{self.n} ({self.exact / self.n:.0%}) | {self.n} "
                 f"| {loose_label} | {self.loose}/{self.n} ({self.loose / self.n:.0%}) |")
 
@@ -126,7 +156,7 @@ def evaluate(json_dir: Path, labels_path: Path) -> dict:
             calibration[_bucket(data["store_name"]["confidence"])].append(fuzzy)
 
         if row.get("date"):
-            exact = bool(data["date"]["value"]) and data["date"]["value"] == row["date"]
+            exact = _match_date(data["date"]["value"], row["date"])
             stats["date"].add(exact, exact)
             calibration[_bucket(data["date"]["confidence"])].append(exact)
 
@@ -169,7 +199,7 @@ def _plot_calibration(calibration: dict, path: Path) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    labels = [f"{lo:.1f}–{min(hi, 1.0):.1f}" for lo, hi in CONF_BUCKETS]
+    labels = [f"{lo:.1f}-{min(hi, 1.0):.1f}" for lo, hi in CONF_BUCKETS]
     accs = [sum(v) / len(v) if v else 0.0 for v in calibration.values()]
     counts = [len(v) for v in calibration.values()]
 
@@ -181,7 +211,7 @@ def _plot_calibration(calibration: dict, path: Path) -> None:
     ax.set_ylim(0, 1.08)
     ax.set_ylabel("accuracy")
     ax.set_xlabel("predicted confidence")
-    ax.set_title("Confidence calibration — store(fuzzy) / date / total(±0.05)")
+    ax.set_title("Confidence calibration: store(fuzzy) / date / total(+/-0.05)")
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
     fig.savefig(path, dpi=120)
@@ -214,16 +244,16 @@ def _render_report(result: dict, json_dir: Path, chart_path: Path) -> str:
         "| Confidence bucket | n | accuracy |", "| --- | ---: | ---: |",
     ]
     for (lo, hi), hits in result["calibration"].items():
-        acc = f"{sum(hits) / len(hits):.0%}" if hits else "—"
-        lines.append(f"| {lo:.1f}–{min(hi, 1.0):.1f} | {len(hits)} | {acc} |")
+        acc = f"{sum(hits) / len(hits):.0%}" if hits else "n/a"
+        lines.append(f"| {lo:.1f}-{min(hi, 1.0):.1f} | {len(hits)} | {acc} |")
     lines += ["", f"![calibration]({chart_path.name})", ""]
 
     weak = [f for f, s in stats.items() if s.n and s.loose / s.n < 0.7]
     if weak:
-        lines += [(f"> ⚠️ Below 0.7 (loose): **{', '.join(weak)}** — "
+        lines += [(f"> Below 0.7 (loose): **{', '.join(weak)}**, "
                    "see Prompt.md Phase 11 follow-up before changing rules."), ""]
     elif sum(s.n for s in stats.values()) == 0:
-        lines += [("> _No label cells filled yet — populate `eval/labels.csv` and "
+        lines += [("> _No label cells filled yet: populate `eval/labels.csv` and "
                    "re-run for accuracy + calibration._"), ""]
     return "\n".join(lines) + "\n"
 
