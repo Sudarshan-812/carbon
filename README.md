@@ -1,4 +1,4 @@
-# Carbon Crunch — Receipt OCR & Confidence-Aware Extraction
+# Carbon Crunch - Receipt OCR & Confidence-Aware Extraction
 
 Deterministic batch pipeline that turns receipt images into structured,
 **confidence-scored** JSON plus an aggregate expense summary. Built for the
@@ -11,9 +11,9 @@ image → preprocess → OCR (EasyOCR) → line reconstruction
       → aggregate → outputs/expense_summary.json + .csv + run_report.md
 ```
 
-Every field lands as `{ "value": ..., "confidence": 0.0–1.0 }`; fields below
+Every field lands as `{ "value": ..., "confidence": 0.0-1.0 }`; fields below
 **0.7** are flagged. All tunables (keyword lists, thresholds, weights) live in
-`config.yaml` — no magic numbers in code.
+`config.yaml` - no magic numbers in code.
 
 ## Setup
 
@@ -59,7 +59,7 @@ python -m src.cli summary --json-dir outputs\json --output outputs
 
 Batch exits non-zero if > 20 % of images raise `pipeline_error`.
 
-Dev shortcuts: `.\tasks.ps1 <task>` (Windows) or `make <task>` —
+Dev shortcuts: `.\tasks.ps1 <task>` (Windows) or `make <task>` -
 `check` (ruff + pytest), `test-all` (incl. the slow end-to-end),
 `batch`, `summary`, `eval`, `compare`, `validate`, `rank`.
 
@@ -83,11 +83,11 @@ Dev shortcuts: `.\tasks.ps1 <task>` (Windows) or `make <task>` —
 }
 ```
 
-`outputs/expense_summary.json` / `.csv` — total spend (confident totals only),
+`outputs/expense_summary.json` / `.csv` - total spend (confident totals only),
 transaction count, spend per store (fuzzy-merged vendors, `UNKNOWN` bucket),
 date range, per-receipt exclusions.
 
-`outputs/run_report.md` — coverage %, mean confidence per field, low-confidence
+`outputs/run_report.md` - coverage %, mean confidence per field, low-confidence
 counts by type, flag histogram, wall time, throughput, config hash.
 
 ## Evaluation
@@ -121,7 +121,7 @@ calibration table + chart.
 | `config.yaml` | every tunable |
 | `eval/` | label template + accuracy/calibration/engine-comparison harness |
 | `scripts/` | `coverage_report`, `validate_json`, `rank_outputs` |
-| `docs/writeup.md` | the 1–2 page deliverable |
+| `docs/writeup.md` | the 1-2 page deliverable |
 
 ## Tests
 

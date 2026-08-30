@@ -21,7 +21,7 @@ data/receipts/*
 data/*.zip
 outputs/json/*
 !outputs/json/.gitkeep
-# 5 tracked example outputs (full set stays ignored) — see docs/writeup.md:
+# 5 tracked example outputs (full set stays ignored) - see docs/writeup.md:
 #   X51005663279 happy path (all fields, high confidence)
 #   X51005433541 conflicting_total (rejects kept in meta.alternatives)
 #   X51005433533 deskew 7.8deg (robustness / rotation)

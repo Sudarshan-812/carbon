@@ -2,6 +2,5 @@
 -r requirements.txt
 
 pytest>=8.0
-matplotlib>=3.8
+matplotlib>=3.8       # confidence-calibration chart in eval/evaluate.py
 ruff>=0.5
-jupyter>=1.0

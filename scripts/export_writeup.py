@@ -130,7 +130,7 @@ def main() -> int:
         if subprocess.run(cmd, check=False).returncode == 0 and PDF.is_file():
             print(f"wrote {PDF}  (via pandoc{f' + {avail}' if avail else ''})")
             return 0
-        print("pandoc found but no working PDF engine — writing HTML instead.")
+        print("pandoc found but no working PDF engine - writing HTML instead.")
 
     HTML.write_text(_md_to_html(MD.read_text(encoding="utf-8")), encoding="utf-8")
     print(f"wrote {HTML}")
