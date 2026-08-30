@@ -49,7 +49,9 @@ python -m src.cli one data\receipts\X51005763964.jpg
 
 # whole folder → per-receipt JSON + summary + run_report.md
 python -m src.cli batch --input data\receipts --output outputs --engine easyocr
-#   [--limit N] [--workers K] [--debug]     ← --debug dumps preprocess steps
+#   [--limit N] [--workers K] [--debug] [--skip-existing]
+#   --debug dumps preprocess steps; --skip-existing reuses <id>.json already
+#   in outputs/json (resume a killed run without re-OCR'ing)
 
 # rebuild only the summary from existing JSON
 python -m src.cli summary --json-dir outputs\json --output outputs

@@ -1,0 +1,92 @@
+{
+  "store_name": {
+    "value": "SYARIKAT PERNIAGAAN GIN KEE",
+    "confidence": 0.973
+  },
+  "date": {
+    "value": "2017-12-28",
+    "confidence": 0.921
+  },
+  "items": [
+    {
+      "name": {
+        "value": "1971 SR",
+        "confidence": 0.785
+      },
+      "price": {
+        "value": "148.40",
+        "confidence": 0.984
+      },
+      "qty": null
+    }
+  ],
+  "total_amount": {
+    "value": "148.40",
+    "confidence": 1.0
+  },
+  "low_confidence_fields": [],
+  "flags": [],
+  "meta": {
+    "confidence_breakdown": {
+      "store_name": {
+        "ocr": 0.986,
+        "pattern": 0.889,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.45
+        }
+      },
+      "date": {
+        "ocr": 0.775,
+        "pattern": 1.0,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.4,
+          "heuristic": 0.25
+        }
+      },
+      "total_amount": {
+        "ocr": 1.0,
+        "pattern": 1.0,
+        "heuristic": 1.0,
+        "cross_check": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.2,
+          "cross_check": 0.25
+        }
+      }
+    },
+    "currency_detected": "MYR",
+    "image_id": "X51005663279",
+    "engine": "easyocr",
+    "rotation_applied": 0.0,
+    "preprocess_steps": [
+      "grayscale",
+      "resize(x1.06)",
+      "denoise(fastnl)",
+      "illumination",
+      "clahe"
+    ],
+    "mean_ocr_confidence": 0.8763,
+    "n_lines": 30,
+    "n_tokens": 64,
+    "elapsed_ms": 12444.9,
+    "pipeline_version": "0.1.0"
+  },
+  "plain": {
+    "store_name": "SYARIKAT PERNIAGAAN GIN KEE",
+    "date": "2017-12-28",
+    "items": [
+      {
+        "name": "1971 SR",
+        "price": "148.40"
+      }
+    ],
+    "total_amount": "148.40"
+  }
+}

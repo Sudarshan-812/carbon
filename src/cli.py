@@ -78,7 +78,7 @@ def _cmd_batch(args: argparse.Namespace) -> int:
 
     from .extract import VendorRegistry
     from .pipeline import run_one, write_receipt_json
-    from .summary import build_summary, write_summary
+    from .summary import build_summary, load_one_result, write_summary
 
     input_dir = Path(cfg.paths.input_dir)
     if not input_dir.is_dir():
@@ -100,6 +100,23 @@ def _cmd_batch(args: argparse.Namespace) -> int:
     reps = [paths[0] for paths in groups.values()]
     dup_paths = {paths[0].stem: paths[1:] for paths in groups.values() if len(paths) > 1}
     n_duplicates = sum(len(v) for v in dup_paths.values())
+
+    # --skip-existing: rehydrate any <id>.json already on disk and drop it from
+    # the work list, so a killed batch can be resumed without re-OCR'ing.
+    preloaded: list[ReceiptExtraction] = []
+    if args.skip_existing:
+        keep: list[Path] = []
+        for path in reps:
+            done = json_dir / f"{path.stem}.json"
+            if done.is_file():
+                preloaded.append(load_one_result(done))
+            else:
+                keep.append(path)
+        if preloaded:
+            log.info("skip-existing: %d already done, %d to process",
+                     len(preloaded), len(keep))
+        reps = keep
+
     log.info("processing %d unique images (%d duplicates) engine=%s workers=%d -> %s",
              len(reps), n_duplicates, cfg.ocr.engine, workers, json_dir)
 
@@ -126,7 +143,8 @@ def _cmd_batch(args: argparse.Namespace) -> int:
                 result = future.result()
                 write_receipt_json(result, json_dir)
                 results.append(result)
-        results.sort(key=lambda r: str(r.meta.get("image_id", "")))
+    results.extend(preloaded)
+    results.sort(key=lambda r: str(r.meta.get("image_id", "")))
 
     for result in results:  # emit a JSON for every duplicate too
         for dup in dup_paths.get(result.meta.get("image_id", ""), []):
@@ -263,6 +281,8 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--limit", type=int, default=None)
     b.add_argument("--workers", type=int, default=None)
     b.add_argument("--debug", action="store_true")
+    b.add_argument("--skip-existing", dest="skip_existing", action="store_true",
+                   help="reuse <id>.json already in the output dir (resume a killed run)")
     b.set_defaults(func=_cmd_batch)
 
     o = sub.add_parser("one", help="process a single image")

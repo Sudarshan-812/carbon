@@ -1,0 +1,72 @@
+{
+  "store_name": {
+    "value": "99 SPEeq MaRT 5/8 {589537-X)",
+    "confidence": 0.559
+  },
+  "date": {
+    "value": null,
+    "confidence": 0.0
+  },
+  "items": [],
+  "total_amount": {
+    "value": "200.00",
+    "confidence": 0.565
+  },
+  "low_confidence_fields": [
+    "store_name",
+    "date",
+    "total_amount"
+  ],
+  "flags": [
+    "missing_date",
+    "no_items",
+    "total_from_fallback",
+    "low_mean_ocr_conf"
+  ],
+  "meta": {
+    "confidence_breakdown": {
+      "store_name": {
+        "ocr": 0.107,
+        "pattern": 0.357,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.45
+        }
+      },
+      "total_amount": {
+        "ocr": 0.467,
+        "pattern": 1.0,
+        "heuristic": 0.3,
+        "weights": {
+          "ocr": 0.467,
+          "pattern": 0.267,
+          "heuristic": 0.267
+        }
+      }
+    },
+    "currency_detected": "MYR",
+    "image_id": "X51005268408",
+    "engine": "easyocr",
+    "rotation_applied": 0.0,
+    "preprocess_steps": [
+      "grayscale",
+      "resize(x1.32)",
+      "denoise(fastnl)",
+      "illumination",
+      "clahe"
+    ],
+    "mean_ocr_confidence": 0.3726,
+    "n_lines": 22,
+    "n_tokens": 50,
+    "elapsed_ms": 36298.8,
+    "pipeline_version": "0.1.0"
+  },
+  "plain": {
+    "store_name": "99 SPEeq MaRT 5/8 {589537-X)",
+    "date": null,
+    "items": [],
+    "total_amount": "200.00"
+  }
+}

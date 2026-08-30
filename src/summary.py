@@ -99,25 +99,31 @@ def build_summary(results: list[ReceiptExtraction], cfg: Config) -> ExpenseSumma
     return summary
 
 
+def result_from_json_dict(data: dict) -> ReceiptExtraction:
+    """Rehydrate one :class:`ReceiptExtraction` from a parsed ``<id>.json`` dict."""
+    return ReceiptExtraction(
+        store_name=FieldConf(**data["store_name"]),
+        date=FieldConf(**data["date"]),
+        total_amount=FieldConf(**data["total_amount"]),
+        items=[
+            Item(name=FieldConf(**it["name"]), price=FieldConf(**it["price"]),
+                 meta={"qty": it.get("qty")})
+            for it in data.get("items", [])
+        ],
+        low_confidence_fields=data.get("low_confidence_fields", []),
+        flags=data.get("flags", []),
+        meta=data.get("meta", {}),
+    )
+
+
+def load_one_result(path: str | Path) -> ReceiptExtraction:
+    """Rehydrate a single ``outputs/json/<id>.json`` file."""
+    return result_from_json_dict(json.loads(Path(path).read_text(encoding="utf-8")))
+
+
 def load_results_from_json(json_dir: str | Path) -> list[ReceiptExtraction]:
     """Rehydrate :class:`ReceiptExtraction` objects from ``outputs/json/*.json``."""
-    results: list[ReceiptExtraction] = []
-    for path in sorted(Path(json_dir).glob("*.json")):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        results.append(ReceiptExtraction(
-            store_name=FieldConf(**data["store_name"]),
-            date=FieldConf(**data["date"]),
-            total_amount=FieldConf(**data["total_amount"]),
-            items=[
-                Item(name=FieldConf(**it["name"]), price=FieldConf(**it["price"]),
-                     meta={"qty": it.get("qty")})
-                for it in data.get("items", [])
-            ],
-            low_confidence_fields=data.get("low_confidence_fields", []),
-            flags=data.get("flags", []),
-            meta=data.get("meta", {}),
-        ))
-    return results
+    return [load_one_result(p) for p in sorted(Path(json_dir).glob("*.json"))]
 
 
 def _store_rows(summary: ExpenseSummary) -> list[tuple[str, StoreSpend]]:

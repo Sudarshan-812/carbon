@@ -1,0 +1,130 @@
+{
+  "store_name": {
+    "value": "UNIHAKKA INTERNATIONAL SDN BHD",
+    "confidence": 0.979
+  },
+  "date": {
+    "value": "2018-03-14",
+    "confidence": 0.755
+  },
+  "items": [
+    {
+      "name": {
+        "value": "SR 1001 ouooogd- Vege",
+        "confidence": 0.537
+      },
+      "price": {
+        "value": "55.50",
+        "confidence": 0.953
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR I001 oudoooc6- Pork",
+        "confidence": 0.531
+      },
+      "price": {
+        "value": "82.70",
+        "confidence": 0.844
+      },
+      "qty": null
+    }
+  ],
+  "total_amount": {
+    "value": "58.20",
+    "confidence": 0.563
+  },
+  "low_confidence_fields": [
+    "total_amount",
+    "items[0].name",
+    "items[1].name"
+  ],
+  "flags": [
+    "conflicting_total",
+    "items_price_sum_mismatch"
+  ],
+  "meta": {
+    "confidence_breakdown": {
+      "store_name": {
+        "ocr": 0.998,
+        "pattern": 0.9,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.45
+        }
+      },
+      "date": {
+        "ocr": 0.979,
+        "pattern": 1.0,
+        "heuristic": 0.65,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.4,
+          "heuristic": 0.25
+        },
+        "conflict_penalty": -0.15
+      },
+      "total_amount": {
+        "ocr": 0.768,
+        "pattern": 1.0,
+        "heuristic": 1.0,
+        "cross_check": 0.177,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.2,
+          "cross_check": 0.25
+        },
+        "conflict_penalty": -0.15
+      }
+    },
+    "alternatives": {
+      "date": [
+        {
+          "value": "2018-03-01"
+        }
+      ],
+      "total_amount": [
+        {
+          "value": "62.70",
+          "tier": "A",
+          "line_index": 11
+        }
+      ]
+    },
+    "currency_detected": "USD",
+    "image_id": "X51005433541",
+    "engine": "easyocr",
+    "rotation_applied": 5.65,
+    "preprocess_steps": [
+      "grayscale",
+      "denoise(fastnl)",
+      "illumination",
+      "clahe",
+      "deskew(+5.65)"
+    ],
+    "mean_ocr_confidence": 0.645,
+    "n_lines": 26,
+    "n_tokens": 57,
+    "elapsed_ms": 34013.6,
+    "pipeline_version": "0.1.0"
+  },
+  "plain": {
+    "store_name": "UNIHAKKA INTERNATIONAL SDN BHD",
+    "date": "2018-03-14",
+    "items": [
+      {
+        "name": "SR 1001 ouooogd- Vege",
+        "price": "55.50"
+      },
+      {
+        "name": "SR I001 oudoooc6- Pork",
+        "price": "82.70"
+      }
+    ],
+    "total_amount": "58.20"
+  }
+}

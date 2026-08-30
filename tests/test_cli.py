@@ -91,6 +91,37 @@ def test_batch_limit(receipts_dir, tmp_path, monkeypatch):
     assert {p.name for p in (out / "json").glob("*.json")} == {"a.json"}
 
 
+def test_batch_skip_existing_resumes_without_reprocessing(tmp_path, monkeypatch):
+    src_dir = tmp_path / "receipts"
+    src_dir.mkdir()
+    for name in ("a.jpg", "b.jpg", "c.jpg"):          # distinct bytes -> no dedup
+        (src_dir / name).write_bytes(name.encode())
+
+    seen: list[str] = []
+
+    def _run(path, cfg, **_kw):
+        seen.append(path.stem)
+        return _fake_result(path.stem)
+
+    monkeypatch.setattr("src.pipeline.run_one", _run)
+    out = tmp_path / "out"
+
+    # first pass: only a.jpg (sorted first) gets processed
+    cli.main(["batch", "--input", str(src_dir), "--output", str(out), "--limit", "1"])
+    assert seen == ["a"]
+    a_before = (out / "json" / "a.json").read_text(encoding="utf-8")
+
+    # resume: a.json is reused, only b and c are OCR'd, report covers all three
+    seen.clear()
+    rc = cli.main(["batch", "--input", str(src_dir), "--output", str(out), "--skip-existing"])
+    assert rc == 0
+    assert sorted(seen) == ["b", "c"]
+    assert (out / "json" / "a.json").read_text(encoding="utf-8") == a_before
+    assert {p.name for p in (out / "json").glob("*.json")} == {"a.json", "b.json", "c.json"}
+    report = (out / "run_report.md").read_text(encoding="utf-8")
+    assert "## Financial summary" in report
+
+
 def test_batch_exit_nonzero_when_too_many_errors(receipts_dir, tmp_path, monkeypatch):
     monkeypatch.setattr("src.pipeline.run_one",
                         lambda path, cfg, **_kw: _fake_result(path.stem, error=True))

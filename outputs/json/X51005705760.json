@@ -1,0 +1,146 @@
+{
+  "store_name": {
+    "value": "tRI SHAAS SDN BHD (728515-H)",
+    "confidence": 0.77
+  },
+  "date": {
+    "value": "2017-08-10",
+    "confidence": 0.743
+  },
+  "items": [
+    {
+      "name": {
+        "value": "9555495401844_ Je",
+        "confidence": 0.245
+      },
+      "price": {
+        "value": "2.50",
+        "confidence": 0.759
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "jtem-Gount 2 9",
+        "confidence": 0.736
+      },
+      "price": {
+        "value": "21.40",
+        "confidence": 0.855
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "Rounchng edjustment'",
+        "confidence": 0.359
+      },
+      "price": {
+        "value": "0.00",
+        "confidence": 0.66
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "Fatal #i9Ned otnanng",
+        "confidence": 0.429
+      },
+      "price": {
+        "value": "21.40",
+        "confidence": 0.924
+      },
+      "qty": null
+    }
+  ],
+  "total_amount": {
+    "value": "28.60",
+    "confidence": 0.709
+  },
+  "low_confidence_fields": [
+    "items[0].name",
+    "items[2].name",
+    "items[2].price",
+    "items[3].name"
+  ],
+  "flags": [
+    "total_from_fallback",
+    "date_order_ambiguous",
+    "items_price_sum_mismatch"
+  ],
+  "meta": {
+    "confidence_breakdown": {
+      "store_name": {
+        "ocr": 0.608,
+        "pattern": 0.536,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.45
+        }
+      },
+      "date": {
+        "ocr": 0.836,
+        "pattern": 0.5,
+        "heuristic": 1.0,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.4,
+          "heuristic": 0.25
+        }
+      },
+      "total_amount": {
+        "ocr": 0.998,
+        "pattern": 1.0,
+        "heuristic": 0.3,
+        "cross_check": 0.399,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.2,
+          "cross_check": 0.25
+        }
+      }
+    },
+    "currency_detected": "MYR",
+    "image_id": "X51005705760",
+    "engine": "easyocr",
+    "rotation_applied": 0.0,
+    "preprocess_steps": [
+      "grayscale",
+      "resize(x0.90)",
+      "denoise(fastnl)",
+      "illumination",
+      "clahe"
+    ],
+    "mean_ocr_confidence": 0.6767,
+    "n_lines": 48,
+    "n_tokens": 111,
+    "elapsed_ms": 19638.6,
+    "pipeline_version": "0.1.0"
+  },
+  "plain": {
+    "store_name": "tRI SHAAS SDN BHD (728515-H)",
+    "date": "2017-08-10",
+    "items": [
+      {
+        "name": "9555495401844_ Je",
+        "price": "2.50"
+      },
+      {
+        "name": "jtem-Gount 2 9",
+        "price": "21.40"
+      },
+      {
+        "name": "Rounchng edjustment'",
+        "price": "0.00"
+      },
+      {
+        "name": "Fatal #i9Ned otnanng",
+        "price": "21.40"
+      }
+    ],
+    "total_amount": "28.60"
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "store_name": {
+    "value": "PERNIAGAAN Jm0326955-V PERMAS 9/5",
+    "confidence": 0.69
+  },
+  "date": {
+    "value": null,
+    "confidence": 0.0
+  },
+  "items": [
+    {
+      "name": {
+        "value": "Item CUTTING GA iol DISC PC) 36.CC",
+        "confidence": 0.687
+      },
+      "price": {
+        "value": "35.00",
+        "confidence": 0.998
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "2547 KOBEL CO G-12#(2: 6MM)",
+        "confidence": 0.469
+      },
+      "price": {
+        "value": "7.60",
+        "confidence": 0.684
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR: PAINT Ga 18} BRUSH 110C",
+        "confidence": 0.654
+      },
+      "price": {
+        "value": "5.60",
+        "confidence": 0.826
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR: Cs 2\" '(750) PAINT G4Ik !",
+        "confidence": 0.589
+      },
+      "price": {
+        "value": "3.60",
+        "confidence": 0.991
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR CS 1-122\" (750) PAINT (8o / BRUSH 20 PCS 26.0C",
+        "confidence": 0.62
+      },
+      "price": {
+        "value": "26.00",
+        "confidence": 0.816
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR' 2\" LAMBWVOOL G#lkol 8104",
+        "confidence": 0.565
+      },
+      "price": {
+        "value": "6.00",
+        "confidence": 0.827
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR: 10# WELDING = G1l8o | 10",
+        "confidence": 0.59
+      },
+      "price": {
+        "value": "0.30",
+        "confidence": 0.866
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "3680 WELDING GLASS (CLEAR) 1PC 16.0C",
+        "confidence": 0.786
+      },
+      "price": {
+        "value": "8.00",
+        "confidence": 0.705
+      },
+      "qty": null
+    },
+    {
+      "name": {
+        "value": "SR AEC BROOM GBikl 'HANDLE 23 X2a=",
+        "confidence": 0.736
+      },
+      "price": {
+        "value": "12.00",
+        "confidence": 0.935
+      },
+      "qty": 23
+    }
+  ],
+  "total_amount": {
+    "value": "332.30",
+    "confidence": 0.707
+  },
+  "low_confidence_fields": [
+    "store_name",
+    "date",
+    "items[0].name",
+    "items[1].name",
+    "items[1].price",
+    "items[2].name",
+    "items[3].name",
+    "items[4].name",
+    "items[5].name",
+    "items[6].name"
+  ],
+  "flags": [
+    "missing_date",
+    "items_price_sum_mismatch"
+  ],
+  "meta": {
+    "confidence_breakdown": {
+      "store_name": {
+        "ocr": 0.871,
+        "pattern": 0.576,
+        "heuristic": 0.6,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.45
+        }
+      },
+      "total_amount": {
+        "ocr": 0.806,
+        "pattern": 1.0,
+        "heuristic": 1.0,
+        "cross_check": 0.098,
+        "weights": {
+          "ocr": 0.35,
+          "pattern": 0.2,
+          "heuristic": 0.2,
+          "cross_check": 0.25
+        }
+      }
+    },
+    "currency_detected": "MYR",
+    "image_id": "X51005433533",
+    "engine": "easyocr",
+    "rotation_applied": 7.77,
+    "preprocess_steps": [
+      "grayscale",
+      "denoise(fastnl)",
+      "illumination",
+      "clahe",
+      "deskew(+7.77)"
+    ],
+    "mean_ocr_confidence": 0.7257,
+    "n_lines": 42,
+    "n_tokens": 195,
+    "elapsed_ms": 47038.7,
+    "pipeline_version": "0.1.0"
+  },
+  "plain": {
+    "store_name": "PERNIAGAAN Jm0326955-V PERMAS 9/5",
+    "date": null,
+    "items": [
+      {
+        "name": "Item CUTTING GA iol DISC PC) 36.CC",
+        "price": "35.00"
+      },
+      {
+        "name": "2547 KOBEL CO G-12#(2: 6MM)",
+        "price": "7.60"
+      },
+      {
+        "name": "SR: PAINT Ga 18} BRUSH 110C",
+        "price": "5.60"
+      },
+      {
+        "name": "SR: Cs 2\" '(750) PAINT G4Ik !",
+        "price": "3.60"
+      },
+      {
+        "name": "SR CS 1-122\" (750) PAINT (8o / BRUSH 20 PCS 26.0C",
+        "price": "26.00"
+      },
+      {
+        "name": "SR' 2\" LAMBWVOOL G#lkol 8104",
+        "price": "6.00"
+      },
+      {
+        "name": "SR: 10# WELDING = G1l8o | 10",
+        "price": "0.30"
+      },
+      {
+        "name": "3680 WELDING GLASS (CLEAR) 1PC 16.0C",
+        "price": "8.00"
+      },
+      {
+        "name": "SR AEC BROOM GBikl 'HANDLE 23 X2a=",
+        "price": "12.00"
+      }
+    ],
+    "total_amount": "332.30"
+  }
+}
