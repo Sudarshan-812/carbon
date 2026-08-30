@@ -126,7 +126,7 @@ calibration table + chart.
 ## Tests
 
 ```powershell
-pytest -q                       # 130 tests; add -m "" for the slow end-to-end
+pytest -q                       # 132 tests; add -m "" for the slow end-to-end
 ruff check src tests scripts eval
 python scripts/coverage_report.py
 ```
